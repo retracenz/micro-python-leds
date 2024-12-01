@@ -3,7 +3,7 @@ import neopixel
 from config import NUM_LEDS, LED_PIN
 
 
-def initialize_leds():
+def initializeLEDs():
     """
     Initializes the NeoPixel strip.
     :param pin: GPIO pin connected to the WS2812B data line.
@@ -13,15 +13,15 @@ def initialize_leds():
     return neopixel.NeoPixel(machine.Pin(LED_PIN), NUM_LEDS)
 
 
-def fillSection(np, start, stop, color):
+def fillSection(np, start, stop, colour):
     """
-    Sets all LEDs to a specific color.
+    Sets all LEDs to a specific colour.
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
-    :param color: Tuple (R, G, B) for the color.
+    :param colour: Tuple (R, G, B) for the colour.
     """
     for i in range(start, stop):
-        np[i] = color
+        np[i] = colour
         np.write()
 
 
@@ -34,23 +34,22 @@ def mirrorSection(np, colour, count):
     fillSection(np, int(NUM_LEDS) - count, int(NUM_LEDS), colour)
 
 
-def fill_color(np, color):
+def fillColour(np, colour):
     """
-    Sets all LEDs to a specific color.
+    Sets all LEDs to a specific colour.
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
-    :param color: Tuple (R, G, B) for the color.
+    :param colour: Tuple (R, G, B) for the colour.
     """
     for i in range(NUM_LEDS):
-        np[i] = color
+        np[i] = colour
     np.write()
 
 
-def stop_animation(np):
+def stopAnimation(np):
     """
     Turns off all LEDs.
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
     """
-    fill_color(np, (0, 0, 0))
-    print("Animation stopped and LEDs turned off.")
+    fillColour(np, (0, 0, 0))
