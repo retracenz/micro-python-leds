@@ -4,16 +4,18 @@ from machine import Pin
 from config import BUTTON_PIN
 import time
 
+stopAnimation(ledStrip)
+
 green = (0, 25, 5)
 blue = (0, 5, 25)
 pink = (25, 0, 25)
+orange = (45, 25, 0)
 
 # Define the button pin (internal pull-up resistor enabled)
 button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_UP)
 
 # Variables to track state
 led_state = False
-debounce_time = 0.2  # Debounce delay in seconds
 long_press_time = 1  # Time in seconds to detect a long press
 button_pressed_time = None
 
@@ -38,9 +40,9 @@ def handleButton(pin):
                 # Short press detected: toggle LEDs
                 led_state = not led_state
                 if led_state:
-                    mirrorSection(ledStrip, pink, 20)
+                    mirrorSection(ledStrip, pink, green, 20)
                 else:
-                    mirrorSection(ledStrip, blue, 50)
+                    mirrorSection(ledStrip, blue, orange, 50)
 
 
 # Attach interrupt to the button pin

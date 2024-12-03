@@ -25,12 +25,12 @@ def fillSection(np, start, stop, colour):
         np.write()
 
 
-def mirrorSection(np, colour, count):
+def mirrorSection(np, colour, secondaryColour, count):
     # Normal Section
     fillSection(np, 0, count, colour)
-    fillSection(np, count, int(NUM_LEDS / 2), (45, 25, 0))
+    fillSection(np, count, int(NUM_LEDS / 2), secondaryColour)
     # Mirror Section
-    fillSection(np, int(NUM_LEDS / 2), int(NUM_LEDS) - count, (45, 25, 0))
+    fillSection(np, int(NUM_LEDS / 2), int(NUM_LEDS) - count, secondaryColour)
     fillSection(np, int(NUM_LEDS) - count, int(NUM_LEDS), colour)
 
 
