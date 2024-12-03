@@ -53,13 +53,13 @@ def handleButton2(pin, state):
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
-        if button_pressed_time is None:
-            button_pressed_time = time.ticks_ms()
+        if state['button_pressed_time'] is None:
+            state['button_pressed_time'] = time.ticks_ms()
     else:  # Button released
-        if button_pressed_time is not None:
+        if state['button_pressed_time'] is not None:
             press_duration = time.ticks_diff(
-                time.ticks_ms(), button_pressed_time) / 1000.0
-            button_pressed_time = None  # Reset the pressed time
+                time.ticks_ms(), state['button_pressed_time']) / 1000.0
+            state['button_pressed_time'] = None  # Reset the pressed time
 
             if press_duration > LONG_PRESS_TIME:
                 # Long press detected: rainbow cycle!! 🌈
