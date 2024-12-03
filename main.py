@@ -24,6 +24,9 @@ button2 = Pin(BUTTON_2_PIN, Pin.IN, Pin.PULL_UP)
 
 
 def handleButton(pin, state):
+    if time.ticks_diff(time.ticks_ms(), state.get("button_pressed_time", 0) or 0) < 200:
+        return  # Debounce: Ignore events within 200ms
+    state["stop_flag"] = True
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
@@ -49,6 +52,8 @@ def handleButton(pin, state):
 
 
 def handleButton2(pin, state):
+    if time.ticks_diff(time.ticks_ms(), state.get("button_pressed_time", 0) or 0) < 200:
+        return  # Debounce: Ignore events within 200ms
     state["stop_flag"] = True
 
     if not pin.value():  # Button pressed (active low)
