@@ -1,5 +1,6 @@
 import machine
 import neopixel
+import time
 from config import NUM_LEDS, LED_PIN
 
 
@@ -44,6 +45,41 @@ def fillColour(np, colour):
     for i in range(NUM_LEDS):
         np[i] = colour
     np.write()
+
+
+def wheel(pos):
+    """
+    Generate rainbow colors across 0-255 positions.
+    :param pos: Position in the color wheel (0-255).
+    :return: Tuple (R, G, B) for the color.
+    """
+    if pos < 85:
+        return (255 - pos * 3, pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return (0, 255 - pos * 3, pos * 3)
+    else:
+        pos -= 170
+        return (pos * 3, 0, 255 - pos * 3)
+
+
+def rainbowCycle(np):
+    """
+    Cycles through the colours of the rainbow.
+    :param np: NeoPixel object.
+    :param NUM_LEDS: Number of LEDs in the strip.
+    """
+    for j in range(255):
+        for i in range(NUM_LEDS):
+            np[i] = wheel((i + j) & 255)
+        np.write()
+
+        # Check if button2 is pressed
+        # if button2.value() == 0:  # Button is pressed
+        #     print("Button pressed! Exiting rainbowCycle.")
+        #     return  # Exit the function
+
+        time.sleep(0.1)
 
 
 def stopAnimation(np):

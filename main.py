@@ -1,5 +1,5 @@
 from boot import ledStrip
-from leds import mirrorSection, stopAnimation
+from leds import mirrorSection, stopAnimation, rainbowCycle
 from machine import Pin
 from config import BUTTON_PIN, BUTTON_2_PIN
 import time
@@ -41,6 +41,7 @@ def handleButton(pin):
             else:
                 # Short press detected: toggle LEDs
                 led_state = not led_state
+
                 if led_state:
                     mirrorSection(ledStrip, pink, green, 20)
                 else:
@@ -62,7 +63,7 @@ def handleButton2(pin):
 
             if press_duration > long_press_time:
                 # Long press detected: turn off LEDs completely
-                stopAnimation(ledStrip)
+                rainbowCycle(ledStrip)
             else:
                 mirrorSection(
                     ledStrip,
@@ -80,5 +81,10 @@ button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handleButton)
 button2.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handleButton2)
 
 # Keep the program running
-while True:
-    time.sleep(0.1)
+try:
+    while True:
+        pass
+
+except KeyboardInterrupt:
+    print("Program interrupted.")
+    stopAnimation(ledStrip)
