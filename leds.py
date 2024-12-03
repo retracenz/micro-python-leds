@@ -1,7 +1,7 @@
 import machine
 import neopixel
 import time
-from config import NUM_LEDS, LED_PIN
+from config import NUM_LEDS, LED_PIN, RAINBOW, IDLE
 
 
 def initializeLEDs():
@@ -72,7 +72,7 @@ def rainbowCycle(np, state):
     NUM_LEDS = len(np)
     j = 0
 
-    while state["animation_state"] == 'Rainbow Time':
+    while state["animation_state"] == RAINBOW:
         for i in range(NUM_LEDS):
             np[i] = wheel((i + j) & 255)
         np.write()
@@ -88,5 +88,5 @@ def stopAnimation(np, state):
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
     """
-    state["stop_flag"] = True
+    state["animation_state"] = IDLE
     fillColour(np, (0, 0, 0))

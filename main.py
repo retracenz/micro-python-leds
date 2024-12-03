@@ -1,14 +1,14 @@
 from boot import ledStrip
 from leds import mirrorSection, stopAnimation, rainbowCycle
 from machine import Pin
-from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME
+from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW
 import time
 import random
 
 shared_state = {
     "led_state": False,  # Tracks whether LEDs are on/off
     "button_pressed_time": None,  # Tracks button press time
-    "animation_state": 'static'  # Controls whether to run rainbow cycle
+    "animation_state": IDLE  # Controls whether to run rainbow cycle
 }
 
 stopAnimation(ledStrip, shared_state)
@@ -26,7 +26,7 @@ button2 = Pin(BUTTON_2_PIN, Pin.IN, Pin.PULL_UP)
 def handleButton(pin, state):
     print("Button pressed", state['animation_state'])
 
-    state["animation_state"] = 'static'
+    state["animation_state"] = IDLE
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
@@ -54,7 +54,7 @@ def handleButton(pin, state):
 def handleButton2(pin, state):
     print("Button 2 pressed", state['animation_state'])
 
-    state["animation_state"] = 'static'
+    state["animation_state"] = IDLE
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
@@ -68,7 +68,7 @@ def handleButton2(pin, state):
 
             if press_duration > LONG_PRESS_TIME:
                 # Long press detected: rainbow cycle!! 🌈
-                state['animation_state'] = 'Rainbow Time'
+                state['animation_state'] = RAINBOW
             else:
                 mirrorSection(
                     ledStrip,
@@ -91,7 +91,7 @@ button2.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING,
 try:
     while True:
         # Moved it to here, to try and not block the main loop
-        while shared_state['animation_state'] == 'Rainbow Time':
+        while shared_state['animation_state'] == RAINBOW:
             print("Rainbow time!!")
             rainbowCycle(ledStrip, shared_state)
 
