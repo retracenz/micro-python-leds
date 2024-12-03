@@ -72,7 +72,7 @@ def rainbowCycle(np, state):
     NUM_LEDS = len(np)
     j = 0
 
-    while not state["stop_flag"]:
+    while state["animation_state"] == 'Rainbow Time':
         for i in range(NUM_LEDS):
             np[i] = wheel((i + j) & 255)
         np.write()
