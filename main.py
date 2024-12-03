@@ -1,11 +1,17 @@
 from boot import ledStrip
 from leds import mirrorSection, stopAnimation, rainbowCycle
 from machine import Pin
-from config import BUTTON_PIN, BUTTON_2_PIN
+from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME
 import time
 import random
 
-stopAnimation(ledStrip)
+shared_state = {
+    "led_state": False,  # Tracks whether LEDs are on/off
+    "button_pressed_time": None,  # Tracks button press time
+    "stop_flag": False,  # Controls whether animations should stop
+}
+
+stopAnimation(ledStrip, shared_state)
 
 green = (0, 25, 5)
 blue = (0, 5, 25)
@@ -16,40 +22,34 @@ orange = (45, 25, 0)
 button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_UP)
 button2 = Pin(BUTTON_2_PIN, Pin.IN, Pin.PULL_UP)
 
-# Variables to track state
-led_state = False
-long_press_time = 1  # Time in seconds to detect a long press
-button_pressed_time = None
 
-
-def handleButton(pin):
-    global led_state, button_pressed_time
+def handleButton(pin, state):
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
-        if button_pressed_time is None:
-            button_pressed_time = time.ticks_ms()
+        if state['button_pressed_time'] is None:
+            state['button_pressed_time'] = time.ticks_ms()
     else:  # Button released
-        if button_pressed_time is not None:
+        if state['button_pressed_time'] is not None:
             press_duration = time.ticks_diff(
-                time.ticks_ms(), button_pressed_time) / 1000.0
-            button_pressed_time = None  # Reset the pressed time
+                time.ticks_ms(), state['button_pressed_time']) / 1000.0
+            state['button_pressed_time'] = None  # Reset the pressed time
 
-            if press_duration > long_press_time:
+            if press_duration > LONG_PRESS_TIME:
                 # Long press detected: turn off LEDs completely
-                stopAnimation(ledStrip)
+                stopAnimation(ledStrip, state)
             else:
                 # Short press detected: toggle LEDs
-                led_state = not led_state
+                state['led_state'] = not state['led_state']
 
-                if led_state:
+                if state['led_state']:
                     mirrorSection(ledStrip, pink, green, 20)
                 else:
                     mirrorSection(ledStrip, blue, orange, 50)
 
 
-def handleButton2(pin):
-    global led_state, button_pressed_time
+def handleButton2(pin, state):
+    state["stop_flag"] = True
 
     if not pin.value():  # Button pressed (active low)
         # Record the time when the button was first pressed
@@ -61,9 +61,10 @@ def handleButton2(pin):
                 time.ticks_ms(), button_pressed_time) / 1000.0
             button_pressed_time = None  # Reset the pressed time
 
-            if press_duration > long_press_time:
-                # Long press detected: turn off LEDs completely
-                rainbowCycle(ledStrip)
+            if press_duration > LONG_PRESS_TIME:
+                # Long press detected: rainbow cycle!! 🌈
+                state["stop_flag"] = False  # Reset stop flag
+                rainbowCycle(ledStrip, state)
             else:
                 mirrorSection(
                     ledStrip,
@@ -76,9 +77,11 @@ def handleButton2(pin):
 
 
 # Attach interrupt to the button pin
-button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handleButton)
+button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING,
+           handler=lambda pin: handleButton(pin, shared_state))
 
-button2.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handleButton2)
+button2.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING,
+            handler=lambda pin: handleButton2(pin, shared_state))
 
 # Keep the program running
 try:
@@ -87,4 +90,4 @@ try:
 
 except KeyboardInterrupt:
     print("Program interrupted.")
-    stopAnimation(ledStrip)
+    stopAnimation(ledStrip, shared_state)

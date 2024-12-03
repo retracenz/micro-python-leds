@@ -63,29 +63,30 @@ def wheel(pos):
         return (pos * 3, 0, 255 - pos * 3)
 
 
-def rainbowCycle(np):
+def rainbowCycle(np, state):
     """
     Cycles through the colours of the rainbow.
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
     """
-    for j in range(255):
+    NUM_LEDS = len(np)
+    j = 0
+
+    while not state["stop_flag"]:
         for i in range(NUM_LEDS):
             np[i] = wheel((i + j) & 255)
         np.write()
+        j = (j + 1) % 256
 
-        # Check if button2 is pressed
-        # if button2.value() == 0:  # Button is pressed
-        #     print("Button pressed! Exiting rainbowCycle.")
-        #     return  # Exit the function
-
-        time.sleep(0.1)
+        # Small delay for smooth animation
+        time.sleep(0.01)
 
 
-def stopAnimation(np):
+def stopAnimation(np, state):
     """
     Turns off all LEDs.
     :param np: NeoPixel object.
     :param NUM_LEDS: Number of LEDs in the strip.
     """
+    state["stop_flag"] = True
     fillColour(np, (0, 0, 0))
