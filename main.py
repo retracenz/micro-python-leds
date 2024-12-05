@@ -1,14 +1,15 @@
 from boot import ledStrip
-from leds import mirrorSection, stopAnimation, rainbowCycle, randomFlash
+from leds import mirrorSection, stopAnimation, rainbowCycle, randomFlash, xmasLights
 from machine import Pin
-from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW, RANDOM
+from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW, RANDOM, XMAS
 import time
 import random
 
 shared_state = {
     "led_state": False,  # Tracks whether LEDs are on/off
     "button_pressed_time": None,  # Tracks button press time
-    "animation_state": IDLE  # Controls whether to run rainbow cycle
+    "animation_state": IDLE,  # Controls whether to run rainbow cycle
+    "animation_number": 0
 }
 
 stopAnimation(ledStrip, shared_state)
@@ -17,6 +18,7 @@ green = (0, 25, 5)
 blue = (0, 5, 25)
 pink = (25, 0, 25)
 orange = (45, 25, 0)
+red = (25, 0, 0)
 
 # Define the buttons pin (internal pull-up resistor enabled)
 button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_UP)
@@ -24,8 +26,6 @@ button2 = Pin(BUTTON_2_PIN, Pin.IN, Pin.PULL_UP)
 
 
 def handleButton(pin, state):
-    print("Button pressed", state['animation_state'])
-
     state["animation_state"] = IDLE
 
     if not pin.value():  # Button pressed (active low)
@@ -52,8 +52,6 @@ def handleButton(pin, state):
 
 
 def handleButton2(pin, state):
-    print("Button 2 pressed", state['animation_state'])
-
     state["animation_state"] = IDLE
 
     if not pin.value():  # Button pressed (active low)
@@ -70,7 +68,18 @@ def handleButton2(pin, state):
                 # Long press detected: rainbow cycle!! 🌈
                 state['animation_state'] = RAINBOW
             else:
-                state['animation_state'] = RANDOM
+                if state['animation_number'] == 4:
+                    state['animation_number'] = 0
+
+                if state['animation_number'] == 0:
+                    state['animation_state'] = RANDOM
+                    state['animation_number'] += 1
+                elif state['animation_number'] == 1:
+                    state['animation_state'] = XMAS
+                    state['animation_number'] += 1
+                else:
+                    state['animation_state'] = RAINBOW
+                    state['animation_number'] += 1
 
 
 # Attach interrupt to the button pin
@@ -85,10 +94,11 @@ try:
     while True:
         # Moved it to here, to try and not block the main loop
         while shared_state['animation_state'] == RAINBOW:
-            print("Rainbow time!!")
             rainbowCycle(ledStrip, shared_state)
         while shared_state['animation_state'] == RANDOM:
             randomFlash(ledStrip, shared_state)
+        while shared_state['animation_state'] == XMAS:
+            xmasLights(ledStrip, shared_state)
 
 except KeyboardInterrupt:
     print("Program interrupted.")

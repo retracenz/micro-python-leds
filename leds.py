@@ -1,15 +1,13 @@
 import machine
 import neopixel
 import time
-from config import NUM_LEDS, LED_PIN, RAINBOW, IDLE, RANDOM
+from config import NUM_LEDS, LED_PIN, RAINBOW, IDLE, RANDOM, XMAS
 import random
 
 
 def initializeLEDs():
     """
     Initializes the NeoPixel strip.
-    :param pin: GPIO pin connected to the WS2812B data line.
-    :param NUM_LEDS: Number of LEDs in the strip.
     :return: NeoPixel object.
     """
     return neopixel.NeoPixel(machine.Pin(LED_PIN), NUM_LEDS)
@@ -17,9 +15,10 @@ def initializeLEDs():
 
 def fillSection(np, start, stop, colour):
     """
-    Sets all LEDs to a specific colour.
+    Sets a section of LEDs to a specific colour.
     :param np: NeoPixel object.
-    :param NUM_LEDS: Number of LEDs in the strip.
+    :param start: Start index of the section.
+    :param stop: Stop index of the section.
     :param colour: Tuple (R, G, B) for the colour.
     """
     for i in range(start, stop):
@@ -28,6 +27,13 @@ def fillSection(np, start, stop, colour):
 
 
 def mirrorSection(np, colour, secondaryColour, count):
+    """
+    Sets LEDS to a specific colour and mirrors the pattern.
+    :param np: NeoPixel object.
+    :param colour: Tuple (R, G, B) for the colour.
+    :param secondaryColour: Tuple (R, G, B) for the colour.
+    :param count: Number of LEDs to fill with the primary colour.
+    """
     # Normal Section
     fillSection(np, 0, count, colour)
     fillSection(np, count, int(NUM_LEDS / 2), secondaryColour)
@@ -40,7 +46,6 @@ def fillColour(np, colour):
     """
     Sets all LEDs to a specific colour.
     :param np: NeoPixel object.
-    :param NUM_LEDS: Number of LEDs in the strip.
     :param colour: Tuple (R, G, B) for the colour.
     """
     for i in range(NUM_LEDS):
@@ -68,7 +73,7 @@ def rainbowCycle(np, state):
     """
     Cycles through the colours of the rainbow.
     :param np: NeoPixel object.
-    :param NUM_LEDS: Number of LEDs in the strip.
+    :param state: Dictionary containing the animation state.
     """
     NUM_LEDS = len(np)
     j = 0
@@ -87,10 +92,37 @@ def stopAnimation(np, state):
     """
     Turns off all LEDs.
     :param np: NeoPixel object.
-    :param NUM_LEDS: Number of LEDs in the strip.
+    :param state: Dictionary containing the animation state.
     """
     state["animation_state"] = IDLE
     fillColour(np, (0, 0, 0))
+
+
+def xmasLights(np, state):
+    """
+    Alternates between red and green LEDs.
+    :param np: NeoPixel object.
+    :param state: Dictionary containing the animation state.
+    """
+    count = 1
+    while state["animation_state"] == XMAS:
+        for i in range(NUM_LEDS):
+            if i % 2 == 0:
+                np[i] = (255, 0, 0)
+            else:
+                np[i] = (0, 255, 0)
+        np.write()
+
+        time.sleep(0.5)
+
+        for i in range(NUM_LEDS):
+            if i % 2 == 0:
+                np[i] = (0, 255, 0)
+            else:
+                np[i] = (225, 0, 0)
+        np.write()
+
+        time.sleep(0.5)
 
 
 def randomFlash(np, state):
@@ -102,8 +134,8 @@ def randomFlash(np, state):
     while state["animation_state"] == RANDOM:
         for i in range(NUM_LEDS):
             # Generate random RGB values
-            np[i] = (random.randint(0, 255), random.randint(
-                0, 255), random.randint(0, 255))
+            np[i] = (random.randint(10, 80), random.randint(
+                10, 80), random.randint(10, 80))
         np.write()
 
         # Small delay to create a flashing effect
