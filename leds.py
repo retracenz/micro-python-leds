@@ -1,7 +1,8 @@
 import machine
 import neopixel
 import time
-from config import NUM_LEDS, LED_PIN, RAINBOW, IDLE
+from config import NUM_LEDS, LED_PIN, RAINBOW, IDLE, RANDOM
+import random
 
 
 def initializeLEDs():
@@ -90,3 +91,20 @@ def stopAnimation(np, state):
     """
     state["animation_state"] = IDLE
     fillColour(np, (0, 0, 0))
+
+
+def randomFlash(np, state):
+    """
+    Flashes the LEDs with random colors.
+    :param np: NeoPixel object.
+    :param state: Dictionary containing the animation state.
+    """
+    while state["animation_state"] == RANDOM:
+        for i in range(NUM_LEDS):
+            # Generate random RGB values
+            np[i] = (random.randint(0, 255), random.randint(
+                0, 255), random.randint(0, 255))
+        np.write()
+
+        # Small delay to create a flashing effect
+        time.sleep(0.1)

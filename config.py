@@ -7,3 +7,4 @@ LONG_PRESS_TIME = 1
 # Animation States
 IDLE = "IDLE"
 RAINBOW = "RAINBOW"
+RANDOM = 'RANDOM'

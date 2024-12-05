@@ -1,7 +1,7 @@
 from boot import ledStrip
-from leds import mirrorSection, stopAnimation, rainbowCycle
+from leds import mirrorSection, stopAnimation, rainbowCycle, randomFlash
 from machine import Pin
-from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW
+from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW, RANDOM
 import time
 import random
 
@@ -70,14 +70,7 @@ def handleButton2(pin, state):
                 # Long press detected: rainbow cycle!! 🌈
                 state['animation_state'] = RAINBOW
             else:
-                mirrorSection(
-                    ledStrip,
-                    (random.randint(1, 255), random.randint(
-                        1, 255), random.randint(1, 255)),
-                    (random.randint(1, 255), random.randint(
-                        1, 255), random.randint(1, 255)),
-                    random.randint(1, 60)
-                )
+                state['animation_state'] = RANDOM
 
 
 # Attach interrupt to the button pin
@@ -94,6 +87,8 @@ try:
         while shared_state['animation_state'] == RAINBOW:
             print("Rainbow time!!")
             rainbowCycle(ledStrip, shared_state)
+        while shared_state['animation_state'] == RANDOM:
+            randomFlash(ledStrip, shared_state)
 
 except KeyboardInterrupt:
     print("Program interrupted.")
