@@ -3,13 +3,15 @@ from leds import mirrorSection, stopAnimation, rainbowCycle, randomFlash, xmasLi
 from machine import Pin
 from config import BUTTON_PIN, BUTTON_2_PIN, LONG_PRESS_TIME, IDLE, RAINBOW, RANDOM, XMAS
 import time
-import random
+
+DEBOUNCE_TIME_MS = 50
 
 shared_state = {
     "led_state": False,  # Tracks whether LEDs are on/off
     "button_pressed_time": None,  # Tracks button press time
     "animation_state": IDLE,  # Controls whether to run rainbow cycle
-    "animation_number": 0
+    "animation_number": 0,
+    "is_running": False,
 }
 
 stopAnimation(ledStrip, shared_state)
@@ -52,6 +54,19 @@ def handleButton(pin, state):
 
 
 def handleButton2(pin, state):
+    if state['animation_number'] == 4:
+        state['animation_number'] = 0
+
+    current_time = time.ticks_ms()
+
+    # Not working... 🤔
+    # Ignore rapid successive presses
+    if state.get('last_button_event_time') is not None:
+        if time.ticks_diff(current_time, state['last_button_event_time']) < DEBOUNCE_TIME_MS:
+            return
+
+    state["last_button_event_time"] = current_time
+
     state["animation_state"] = IDLE
 
     if not pin.value():  # Button pressed (active low)
@@ -68,9 +83,6 @@ def handleButton2(pin, state):
                 # Long press detected: rainbow cycle!! 🌈
                 state['animation_state'] = RAINBOW
             else:
-                if state['animation_number'] == 4:
-                    state['animation_number'] = 0
-
                 if state['animation_number'] == 0:
                     state['animation_state'] = RANDOM
                     state['animation_number'] += 1
@@ -93,12 +105,18 @@ button2.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING,
 try:
     while True:
         # Moved it to here, to try and not block the main loop
+        # while shared_state['animation_state'] == RAINBOW and not shared_state["is_running"]:
         while shared_state['animation_state'] == RAINBOW:
             rainbowCycle(ledStrip, shared_state)
+        # while shared_state['animation_state'] == RANDOM and not shared_state["is_running"]:
         while shared_state['animation_state'] == RANDOM:
             randomFlash(ledStrip, shared_state)
+        # while shared_state['animation_state'] == XMAS and not shared_state["is_running"]:
         while shared_state['animation_state'] == XMAS:
             xmasLights(ledStrip, shared_state)
+        else:
+            # Sleep briefly to prevent CPU overuse
+            time.sleep(0.01)
 
 except KeyboardInterrupt:
     print("Program interrupted.")

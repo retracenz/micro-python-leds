@@ -104,7 +104,6 @@ def xmasLights(np, state):
     :param np: NeoPixel object.
     :param state: Dictionary containing the animation state.
     """
-    count = 1
     while state["animation_state"] == XMAS:
         for i in range(NUM_LEDS):
             if i % 2 == 0:
